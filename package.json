@@ -1,27 +1,18 @@
 {
-  "name": "electron-quick-start",
+  "name": "email-sender-electron",
   "version": "1.0.0",
-  "description": "A minimal Electron application",
+  "description": "electron app for sending files by email via drag and drop ",
   "main": "main.js",
   "scripts": {
     "start": "electron main.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/electron/electron-quick-start.git"
+    "url": "git+https://github.com/TrueGuy/email-sender-electron.git"
   },
   "keywords": [
-    "Electron",
-    "quick",
-    "start",
-    "tutorial"
   ],
-  "author": "GitHub",
-  "license": "CC0-1.0",
-  "bugs": {
-    "url": "https://github.com/electron/electron-quick-start/issues"
-  },
-  "homepage": "https://github.com/electron/electron-quick-start#readme",
+  "author": "George Fedoseev",
   "devDependencies": {
     "electron-prebuilt": "^1.1.2"
   }
