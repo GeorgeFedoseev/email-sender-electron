@@ -51,7 +51,8 @@ function createAuthWindow () {
     
     var scopes = [
         'https://www.googleapis.com/auth/plus.me',
-        'https://www.googleapis.com/auth/calendar'
+        'https://www.googleapis.com/auth/gmail.readonly',
+        'https://www.googleapis.com/auth/gmail.send'
     ];
     
     (async () => {
@@ -64,50 +65,49 @@ function createAuthWindow () {
         });
           
         var token = await auth.getAccessToken(scopes, CLIENT_ID, CLIENT_SECRET);
-        
         console.log(JSON.stringify(token, null, 2));
+          
+        var oauth2Client = new OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
+          
+        oauth2Client.setCredentials({
+          access_token: token.access_token,
+          refresh_token: token.refresh_token
+        });
+          
+        listLabels(oauth2Client);
+          
       } catch(err) {
         console.log(err.message + '\n');
       }
     })()
-    
-
-    /*authWindow.on('page-title-updated', function () {
-      setImmediate(function () {
-        const title = authWindow.getTitle();
-        if (title.startsWith('Denied')) {
-          reject(new Error(title.split(/[ =]/)[2]));
-          authWindow.removeAllListeners('closed');
-          authWindow.close();
-        } else if (title.startsWith('Success')) {
-          resolve(title.split(/[ =]/)[2]);
-          authWindow.removeAllListeners('closed');
-          authWindow.close();
-        }
-      });
-    });
-  
-    var oauth2Client = new OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
-
-    // generate a url that asks permissions for Google+ and Google Calendar scopes 
-    var scopes = [
-        'https://www.googleapis.com/auth/plus.me',
-        'https://www.googleapis.com/auth/calendar'
-    ];
-
-    var url = oauth2Client.generateAuthUrl({
-        access_type: 'offline', // 'online' (default) or 'offline' (gets refresh_token) 
-        scope: scopes // If you only need one scope you can pass it as string 
-    });
-    
-  
-    authWindow.loadURL(url)
-    authWindow.on('closed', function () {  
-        authWindow = null
-        reject(new Error('User closed  the window'));
-    })  */
+   
 }
 
+
+function listLabels(token) {
+    var gmail = google.gmail('v1');
+    
+    gmail.users.labels.list({
+        auth: token,
+        userId: 'me',
+    }, function(err, response) {
+        if (err) {
+          console.log('The API returned an error: ' + err);
+          return;
+        }
+        
+        var labels = response.labels;
+        if (labels.length == 0) {
+          console.log('No labels found.');
+        } else {
+          console.log('Labels:');
+          for (var i = 0; i < labels.length; i++) {
+            var label = labels[i];
+            console.log('- %s', label.name);
+          }
+        }
+    });
+}
 
 
 
