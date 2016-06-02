@@ -16,19 +16,39 @@
     var $ = require("jquery");
     const {ipcRenderer} = require('electron');
       
-    require('./renderer.js')
+    require('./index.js')
     
-    
+    var Datastore = require('nedb'),
+        db = new Datastore({ filename: './data.db', autoload: true });
+      
+    ipcRenderer.on("auth-token-updated", () => {
+        db.find({type: "config"}, function(err, docs){
+            if(err){
+                throw err
+            }
+            
+            alert(JSON.stringify(docs));
+        });
+        
+        $("#auth_token").html();
+    });
     
     $(document).ready(function(){
         $("#oauth_start_btn").click(function(){
             ipcRenderer.send("oauth_start");
         });
+        
+        setTimeout (function(){
+            $.get("http://www.google.com/index.html", function(data){
+            console.log("Got response: " + data);
+            });   
+        }, 100);
     });
     
   </script>
     
     
     <button id="oauth_start_btn">OAuth Start</button>
+    <div id="auth_token"></div>
     
 </html>
