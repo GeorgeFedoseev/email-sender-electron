@@ -1,53 +1,114 @@
 const electron = require('electron')
-// Module to control application life.
 const app = electron.app
-// Module to create native browser window.
 const BrowserWindow = electron.BrowserWindow
+const {ipcMain} = require('electron');
 
-// Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
+
+import google_auth from "./google_auth"
+
+
+
+var google = require('googleapis');
+var OAuth2 = google.auth.OAuth2;
+
+var CLIENT_ID = "1031179149187-427vb93q1pns28sqv1v8t13vb43p3j3c.apps.googleusercontent.com";
+var CLIENT_SECRET = "qEL2jbVUaX4nk3LJc7HJyVlU";
+var REDIRECT_URL = "urn:ietf:wg:oauth:2.0:oob";
+
 let mainWindow
 
-function createWindow () {
-  // Create the browser window.
-  mainWindow = new BrowserWindow({width: 800, height: 600})
-
-  // and load the index.html of the app.
-  mainWindow.loadURL(`file://${__dirname}/index.html`)
-
-  // Open the DevTools.
-  mainWindow.webContents.openDevTools()
-
-  // Emitted when the window is closed.
-  mainWindow.on('closed', function () {
-    // Dereference the window object, usually you would store windows
-    // in an array if your app supports multi windows, this is the time
-    // when you should delete the corresponding element.
-    mainWindow = null
-  })
-}
-
-// This method will be called when Electron has finished
-// initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
-app.on('ready', createWindow)
-
-// Quit when all windows are closed.
-app.on('window-all-closed', function () {
-  // On OS X it is common for applications and their menu bar
-  // to stay active until the user quits explicitly with Cmd + Q
+app.on('ready', createMainWindow)
+app.on('window-all-closed', function () {  
   if (process.platform !== 'darwin') {
     app.quit()
-  }
+  }    
 })
 
-app.on('activate', function () {
-  // On OS X it's common to re-create a window in the app when the
-  // dock icon is clicked and there are no other windows open.
+app.on('activate', function () {  
   if (mainWindow === null) {
-    createWindow()
-  }
+    createMainWindow()    
+  }    
 })
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+ipcMain.on("oauth_start", function(){
+    createAuthWindow();
+});
+
+
+function createMainWindow () {
+    console.log("create main win")
+    mainWindow = new BrowserWindow({width: 800, height: 600})
+    mainWindow.loadURL(`file://${__dirname}/windows/index.html`)
+    mainWindow.webContents.toggleDevTools();
+
+    mainWindow.on('closed', function () {  
+    mainWindow = null
+  })  
+}
+
+
+function createAuthWindow () {  
+    
+    var scopes = [
+        'https://www.googleapis.com/auth/plus.me',
+        'https://www.googleapis.com/auth/calendar'
+    ];
+    
+    (async () => {
+      try {
+        const auth = google_auth({
+          width: 450,
+          height: 780,
+          //titleBarStyle: "hidden-inset",
+          resizable: false
+        });
+          
+        var token = await auth.getAccessToken(scopes, CLIENT_ID, CLIENT_SECRET);
+        
+        console.log(JSON.stringify(token, null, 2));
+      } catch(err) {
+        console.log(err.message + '\n');
+      }
+    })()
+    
+
+    /*authWindow.on('page-title-updated', function () {
+      setImmediate(function () {
+        const title = authWindow.getTitle();
+        if (title.startsWith('Denied')) {
+          reject(new Error(title.split(/[ =]/)[2]));
+          authWindow.removeAllListeners('closed');
+          authWindow.close();
+        } else if (title.startsWith('Success')) {
+          resolve(title.split(/[ =]/)[2]);
+          authWindow.removeAllListeners('closed');
+          authWindow.close();
+        }
+      });
+    });
+  
+    var oauth2Client = new OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
+
+    // generate a url that asks permissions for Google+ and Google Calendar scopes 
+    var scopes = [
+        'https://www.googleapis.com/auth/plus.me',
+        'https://www.googleapis.com/auth/calendar'
+    ];
+
+    var url = oauth2Client.generateAuthUrl({
+        access_type: 'offline', // 'online' (default) or 'offline' (gets refresh_token) 
+        scope: scopes // If you only need one scope you can pass it as string 
+    });
+    
+  
+    authWindow.loadURL(url)
+    authWindow.on('closed', function () {  
+        authWindow = null
+        reject(new Error('User closed  the window'));
+    })  */
+}
+
+
+
+
+

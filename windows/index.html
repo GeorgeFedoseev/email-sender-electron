@@ -13,7 +13,22 @@
   </body>
 
   <script>
-    // You can also require other files to run in this process
+    var $ = require("jquery");
+    const {ipcRenderer} = require('electron');
+      
     require('./renderer.js')
+    
+    
+    
+    $(document).ready(function(){
+        $("#oauth_start_btn").click(function(){
+            ipcRenderer.send("oauth_start");
+        });
+    });
+    
   </script>
+    
+    
+    <button id="oauth_start_btn">OAuth Start</button>
+    
 </html>
